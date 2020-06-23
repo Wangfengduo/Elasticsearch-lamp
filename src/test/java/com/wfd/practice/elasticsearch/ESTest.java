@@ -29,6 +29,7 @@ public class ESTest {
     @Test
     public void createIndex(){
         System.out.println("aaa");
+        System.out.println("aaa");
     }
 
 
