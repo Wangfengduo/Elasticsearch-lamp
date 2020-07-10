@@ -3,8 +3,6 @@ package com.wfd.practice.elasticsearch;
 
 import com.alibaba.fastjson.JSON;
 import org.apache.http.HttpHost;
-
-
 import org.elasticsearch.action.DocWriteResponse;
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest;
 import org.elasticsearch.action.delete.DeleteRequest;
@@ -22,8 +20,9 @@ import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.client.indices.CreateIndexRequest;
 import org.elasticsearch.client.indices.CreateIndexResponse;
-import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.unit.TimeValue;
+import org.elasticsearch.index.query.MatchQueryBuilder;
+import org.elasticsearch.index.query.Operator;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.rest.RestStatus;
 import org.elasticsearch.search.SearchHit;
@@ -33,7 +32,6 @@ import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
 import org.junit.Before;
 import org.junit.Test;
 
-import javax.swing.plaf.synth.SynthScrollBarUI;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -286,6 +284,25 @@ public class ESTest {
         }
     }
 
+
+
+    @Test
+    public void pageSearch(){
+        SearchRequest searchRequest = new SearchRequest("lamp-test");
+        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
+        //关键字匹配
+        MatchQueryBuilder matchQueryBuilder = new MatchQueryBuilder("user","傻子" ).operator(Operator.OR);//查询结果必须包含条件中的所有分词;
+        //客户端调用查询对象获取查询结果
+        int page=1;
+        int rows=5;
+        int start= (page-1)*rows;
+        searchSourceBuilder.query(matchQueryBuilder);
+        searchSourceBuilder.from(start);
+        searchSourceBuilder.size(rows);
+        searchSourceBuilder.timeout(new TimeValue(60, TimeUnit.SECONDS));
+
+
+    }
 
 
 }
