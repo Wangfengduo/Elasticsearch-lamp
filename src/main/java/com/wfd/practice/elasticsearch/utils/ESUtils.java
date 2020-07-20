@@ -20,6 +20,7 @@ import org.elasticsearch.client.indices.CreateIndexResponse;
 import org.elasticsearch.client.indices.GetIndexRequest;
 import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.index.query.MatchQueryBuilder;
+import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.slf4j.Logger;
@@ -154,10 +155,9 @@ public class ESUtils {
      * 根据ID获取数据
      * @param index
      * @param id
-     * @param fields
      * @return
      */
-    public static Map<String, Object> searchDataById(String index, String id, String fields) {
+    public static Map<String, Object> searchDataById(String index, String id) {
         GetRequest request = new GetRequest(index, id);
         GetResponse getResponse = null;
         try {
@@ -172,26 +172,61 @@ public class ESUtils {
     }
 
 
-    public static List<Map<String, Object>> searchListData(String index,String keyword,int start, int size){
+
+    /**
+     * matchAll查询(不分页)
+     * @param index
+     * @return
+     */
+    public static List<Map<String, Object>> searchAllData(String index){
         SearchRequest searchRequest = new SearchRequest(index);
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
-        MatchQueryBuilder matchQueryBuilder = new MatchQueryBuilder("user",keyword);
+        //query => match_all
+        searchSourceBuilder.query(QueryBuilders.matchAllQuery());
+        searchRequest.source(searchSourceBuilder);
+        //返回结果
+        SearchResponse search = null;
+        try {
+            search = client.search( searchRequest , RequestOptions.DEFAULT);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        SearchHits hits = search.getHits();
+        return Arrays.stream(hits.getHits()).map(b -> {
+            return b.getSourceAsMap();
+        }).collect(Collectors.toList());
+    }
+
+
+    /**
+     * 搜索某一项
+     * @param index 索引名称
+     * @param field 查询字段名称
+     * @param keyword 关键词
+     * @param start 分页
+     * @param size 分页条数
+     * @return
+     */
+    public static List<Map<String, Object>> searchListData(String index,String field,String keyword,int start, int size){
+        SearchRequest searchRequest = new SearchRequest(index);
+        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
+        MatchQueryBuilder matchQueryBuilder = new MatchQueryBuilder(field,keyword);
         searchSourceBuilder.query(matchQueryBuilder);
         searchSourceBuilder.from(start);
         searchSourceBuilder.size(size);
         searchSourceBuilder.timeout(new TimeValue(60, TimeUnit.SECONDS));
         searchRequest.source(searchSourceBuilder);
 
+        SearchResponse search = null;
         try {
-            SearchResponse search = client.search( searchRequest ,RequestOptions.DEFAULT);
-            SearchHits hits = search.getHits();
-            return Arrays.stream(hits.getHits()).map(b -> {
-                                return b.getSourceAsMap();
-                            }).collect(Collectors.toList());
+            search = client.search( searchRequest ,RequestOptions.DEFAULT);
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return null;
+        SearchHits hits = search.getHits();
+        return Arrays.stream(hits.getHits()).map(b -> {
+            return b.getSourceAsMap();
+        }).collect(Collectors.toList());
     }
 
 
