@@ -22,8 +22,9 @@ public class ESConfig {
     private String port;
 
 
-    @Bean
+    @Bean("getClient")
     public RestHighLevelClient getClient(){
+        System.out.println("容器启动初始化...");
         RestHighLevelClient client = new RestHighLevelClient(
                 RestClient.builder(
                         new HttpHost("149.129.83.145", 9200, "http")));

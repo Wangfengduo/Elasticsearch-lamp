@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.util.Map;
 
@@ -16,15 +17,21 @@ import java.util.Map;
  * @Version 1.0
  */
 @Controller
+@RequestMapping("/ElasticSearch")
 public class ESController {
+
     @Autowired
     private ESUtils esUtils;
 
-    @RequestMapping(value = "/ES/selectById/{index}/{id}")
+    @RequestMapping(value = "/selectById/{index}/{id}")
+    @ResponseBody
     public Map<String, Object> selectById(@PathVariable("index") String index, @PathVariable("id") String id){
         Map<String, Object> resultMap= esUtils.searchDataById(index,id);
         return resultMap;
     }
+
+
+
 
 
 }
